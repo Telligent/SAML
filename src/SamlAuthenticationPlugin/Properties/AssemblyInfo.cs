@@ -8,7 +8,7 @@ using System.Web.UI;
 [assembly: AssemblyTitle("Telligent.Services.SamlAuthentication")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Verint Systems Inc.")]
 [assembly: AssemblyProduct("SamlAuthentication")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

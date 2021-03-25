@@ -244,10 +244,10 @@ namespace Telligent.Services.SamlAuthenticationPlugin
 
         internal static bool IsPathOnSameServer(string absUriOrLocalPath, Uri currentRequestUri)
         {
-            Uri uri;
-            if (Uri.TryCreate(absUriOrLocalPath, UriKind.Absolute, out uri) && !uri.IsLoopback)
+            if (Uri.TryCreate(absUriOrLocalPath, UriKind.Absolute, out var uri) && !uri.IsLoopback)
             {
-                return string.Equals(currentRequestUri.Host, uri.Host, StringComparison.OrdinalIgnoreCase);
+                var urlIsOnSameServer = string.Equals(currentRequestUri.Host, uri.Host, StringComparison.OrdinalIgnoreCase);
+                return urlIsOnSameServer;
             }
             return true;
         }

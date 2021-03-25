@@ -422,13 +422,10 @@ namespace Telligent.Services.SamlAuthenticationPlugin
         #endregion
 
         #region Authentication
-
-
-
-
+        
         protected virtual void ProcessReturnUrl()
         {
-            string returnUrl = SamlHelpers.GetCookieReturnUrl();
+            var returnUrl = SamlHelpers.GetCookieReturnUrl();
 
             SamlHelpers.ClearCookieReturnUrl();
 
@@ -556,15 +553,22 @@ namespace Telligent.Services.SamlAuthenticationPlugin
 
         public OAuthData ProcessLogin(HttpContextBase context)
         {
+            var apiExceptions = Apis.Get<IExceptions>();
             if (!Enabled)
                 return null;
+
             //should have a SamlOAuthClient.oauthTokeyQuerystringKey which corresponds to the current cookie to decrypt
-            string tokenKey = HttpContext.Current.Request[oauthTokeyQuerystringKey];
+            var tokenKey = HttpContext.Current.Request[oauthTokeyQuerystringKey];
             if (!string.IsNullOrEmpty(tokenKey))
             {
                 var samlTokenData = SamlTokenData.GetTokenDataFromDatabase(tokenKey);
                 if (samlTokenData == null)
-                    throw new ArgumentException("The SAML token was not found in the HttpContext.Current.Request, or could not be extracted.  Please ensure cookies are enabled and try again");
+                {
+                    apiExceptions.Log(new ArgumentException(
+                        "The SAML token was not found in the HttpContext.Current.Request, or could not be extracted.  Please ensure cookies are enabled and try again."));
+
+                    ProcessReturnUrl();
+                }
 
                 //Store our token key so we can retrieve it later to raise the SamlUserCreated and SamlAuthenticated events and delete it
                 var afterAuthenticatedCookie = new HttpCookie(clientType, tokenKey) {HttpOnly = true, Expires = DateTime.Now.AddHours(8)};
@@ -577,8 +581,8 @@ namespace Telligent.Services.SamlAuthenticationPlugin
             }
 
             //if this is not a sign-in response, we should probably redirect to login.aspx
-            throw new ArgumentException("The SAML token was not found in the HttpContext.Current.Request, please check the configuration and try again");
-
+            apiExceptions.Log(new ArgumentException("The SAML token was not found in the HttpContext.Current.Request, please check the configuration and try again"));
+            return null;
         }
         
         public string ThemeColor
